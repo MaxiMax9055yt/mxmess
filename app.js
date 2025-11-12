@@ -46,24 +46,22 @@ async function signIn() {
 // Отправка сообщения
 async function sendMessage() {
     const input = document.getElementById('messageInput');
-    const user = auth.currentUser;
     
-    if (!user || !input.value.trim()) return;
+    if (!currentChatId) {
+        alert('Сначала выбери собеседника!');
+        return;
+    }
     
-    await db.collection('messages').add({
-        text: input.value,
-        userId: user.uid,
-        userEmail: user.email,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-        chatId: 'family-chat' // один общий чат для семьи
-    });
-    
+    await sendPrivateMessage(currentChatWith, input.value);
     input.value = '';
 }
 
 // Слушатель сообщений в реальном времени
 function setupMessagesListener() {
+    if (!currentChatId) return;
+    
     db.collection('messages')
+        .where('chatId', '==', currentChatId)
         .orderBy('timestamp', 'asc')
         .onSnapshot(snapshot => {
             const messagesDiv = document.getElementById('messages');
@@ -75,6 +73,9 @@ function setupMessagesListener() {
                 messageElement.innerHTML = `<strong>${msg.userEmail}:</strong> ${msg.text}`;
                 messagesDiv.appendChild(messageElement);
             });
+            
+            // Прокрутка вниз
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
         });
 }
 
