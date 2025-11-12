@@ -133,3 +133,45 @@ async function sendPrivateMessage(otherUserId, text) {
         lastMessageTime: firebase.firestore.FieldValue.serverTimestamp()
     });
 }
+
+let currentChatId = null;
+let currentChatWith = null;
+
+// Загрузить список пользователей
+async function loadUsers() {
+    const usersSnapshot = await db.collection('users').get();
+    const usersDiv = document.getElementById('users');
+    usersDiv.innerHTML = '';
+    
+    usersSnapshot.forEach(doc => {
+        const user = doc.data();
+        if (user.id !== auth.currentUser.uid) {
+            const userElement = document.createElement('div');
+            userElement.innerHTML = `
+                <button onclick="openChat('${doc.id}', '${user.name || user.email}')">
+                    💬 ${user.name || user.email}
+                </button>
+            `;
+            usersDiv.appendChild(userElement);
+        }
+    });
+}
+
+// Открыть чат с пользователем
+async function openChat(otherUserId, otherUserName) {
+    currentChatId = await getOrCreatePrivateChat(otherUserId);
+    currentChatWith = otherUserName;
+    
+    document.getElementById('chatWith').textContent = `Чат с ${otherUserName}`;
+    document.getElementById('userList').style.display = 'none';
+    document.getElementById('chat').style.display = 'block';
+    
+    setupMessagesListener();
+}
+
+// Показать список пользователей
+function showUserList() {
+    document.getElementById('userList').style.display = 'block';
+    document.getElementById('chat').style.display = 'none';
+    loadUsers();
+}
