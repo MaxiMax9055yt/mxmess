@@ -94,3 +94,42 @@ auth.onAuthStateChanged(user => {
 function signOut() {
     auth.signOut();
 }
+
+// Создать или найти личный чат
+async function getOrCreatePrivateChat(otherUserId) {
+    const currentUser = auth.currentUser;
+    const chatId = [currentUser.uid, otherUserId].sort().join('_');
+    
+    const chatRef = db.collection('chats').doc(chatId);
+    const chatDoc = await chatRef.get();
+    
+    if (!chatDoc.exists) {
+        await chatRef.set({
+            type: 'private',
+            members: [currentUser.uid, otherUserId],
+            created: firebase.firestore.FieldValue.serverTimestamp(),
+            lastMessage: 'Чат создан',
+            lastMessageTime: firebase.firestore.FieldValue.serverTimestamp()
+        });
+    }
+    
+    return chatId;
+}
+
+// Отправка в личный чат
+async function sendPrivateMessage(otherUserId, text) {
+    const chatId = await getOrCreatePrivateChat(otherUserId);
+    
+    await db.collection('messages').add({
+        chatId: chatId,
+        userId: auth.currentUser.uid,
+        text: text,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    
+    // Обновляем последнее сообщение в чате
+    await db.collection('chats').doc(chatId).update({
+        lastMessage: text,
+        lastMessageTime: firebase.firestore.FieldValue.serverTimestamp()
+    });
+}
