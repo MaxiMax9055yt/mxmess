@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Семейный чат</title>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+</head>
+<body>
+    <div id="auth">
+        <h2>Семейный чат</h2>
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="password" placeholder="Пароль">
+        <button onclick="signUp()">Регистрация</button>
+        <button onclick="signIn()">Вход</button>
+    </div>
+
+    <div id="chat" style="display:none">
+        <h2>Семейный чат</h2>
+        <div id="messages" style="height: 300px; border: 1px solid #ccc; overflow-y: scroll; padding: 10px;"></div>
+        <input type="text" id="messageInput" placeholder="Напиши сообщение...">
+        <button onclick="sendMessage()">Отправить</button>
+        <button onclick="signOut()">Выйти</button>
+    </div>
+
+    <!-- ВТОРОЙ ФАЙЛ ПОДКЛЮЧАЕТСЯ ТУТ -->
+    <script src="app.js"></script>
+</body>
+</html>
